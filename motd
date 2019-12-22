@@ -1,0 +1,47 @@
+#!/bin/bash
+
+function Progress {
+    _blocks=" ▏▎▍▌▋▊▉█"
+    read _a _b _c
+    let _length=${_c:-10}
+    let _progress=100*$_a/$_b
+    let _done=$_length*$_progress/100
+    let _foo=$_progress*$_length-100*$_done
+    let _left=$_length-$_done-$(($_foo==0?0:1))
+    [[ _foo -ne 0 ]] && _foo=${_blocks:10*_foo/125:1} || _foo=""
+    _done=`printf "%${_done}s"`
+    _left=`printf "%${_left}s"`
+    printf "[${_done// /${_blocks:8:1}}$_foo${_left// /${_blocks:0:1}}] $_progress%%\n"
+}
+
+USERNAME=`whoami`
+HOSTNAME=`hostname`
+OS=`cat /etc/*-release | grep PRETTY_NAME | awk -F "\"" '{ printf $2 }'`
+KERNEL=`uname -r`
+UPTIME=`uptime -p | cut -d " " -f2-`
+LASTLOGIN=`last -F | head -1 | awk '{ print $8 ". " $5 ". " $6 ". " $7 }'`
+CPULOAD=`top -n1 | grep Cpu\(s\): | awk '{ print $2 }'`
+CPUPROG=`echo "${CPULOAD//,} 1000" | Progress`
+CPUTEMP=$(($(</sys/class/thermal/thermal_zone0/temp)/100))
+CPUTEMP="${CPUTEMP:0:2}.${CPUTEMP:2:1}°C"
+MEMORY=`free --mega | grep Mem | awk '{ print "(" $3 "MB / " $2 "MB)"}'`
+MEMORYPROG=`free --mega | grep Mem | awk '{ print $3 " " $2 }' | Progress`
+SDCARD=`df -h | grep /dev/root | awk '{ print "(" $3 " / " $2 ")" }' | tr "," "."`
+SDCARDPROG=`df | grep /dev/root | awk '{ print $3 " " $2 }' | Progress`
+HDD1=`df -h | grep /dev/sda1 | awk '{ print "(" $3 " / " $2 ")" }' | tr "," "."`
+HDD1PROG=`df | grep /dev/sda1 | awk '{ print $3 " " $2 }' | Progress`
+
+echo "
+
+       $(tput bold)$(tput setaf 2).~~.   .~~.$(tput sgr0)        $(tput bold)$(tput setaf 2)user:$(tput sgr0)         $USERNAME@$HOSTNAME
+      $(tput bold)$(tput setaf 2)'. \ ' ' / .'$(tput sgr0)       $(tput bold)$(tput setaf 2)os:$(tput sgr0)           $OS
+       $(tput bold)$(tput setaf 1).~ .~~~..~.$(tput sgr0)        $(tput bold)$(tput setaf 2)kernel:$(tput sgr0)       $KERNEL
+      $(tput bold)$(tput setaf 1): .~.'~'.~. :$(tput sgr0)       $(tput bold)$(tput setaf 2)uptime:$(tput sgr0)       $UPTIME
+     $(tput bold)$(tput setaf 1)~ (   ) (   ) ~$(tput sgr0)      $(tput bold)$(tput setaf 2)last login:$(tput sgr0)   $LASTLOGIN
+    $(tput bold)$(tput setaf 1)( : '~'.~.'~' : )$(tput sgr0)     $(tput bold)$(tput setaf 2)cpu:$(tput sgr0)          $CPUPROG (temp: $CPUTEMP)
+     $(tput bold)$(tput setaf 1)~ .~ (   ) ~. ~$(tput sgr0)      $(tput bold)$(tput setaf 2)memory:$(tput sgr0)       $MEMORYPROG $MEMORY
+      $(tput bold)$(tput setaf 1)(  : '~' :  )$(tput sgr0)       $(tput bold)$(tput setaf 2)sd card:$(tput sgr0)      $SDCARDPROG $SDCARD
+       $(tput bold)$(tput setaf 1)'~ .~~~. ~'$(tput sgr0)        $(tput bold)$(tput setaf 2)hdd:$(tput sgr0)          $HDD1PROG $HDD1
+           $(tput bold)$(tput setaf 1)'~'$(tput sgr0)            
+
+"
