@@ -2,22 +2,22 @@
 set -e
 
 # Remove the default MOTD
-mv /etc/motd /etc/motd.bak
+sudo mv /etc/motd /etc/motd.bak
 
 # Disable printing the "last login" information in ssh
-sed -i -r "s/.*PrintLastLog/#&/" /etc/ssh/sshd_config
-sed -i -r "\$aPrintLastLog no" /etc/ssh/sshd_config
+sudo sed -i -r "s/.*PrintLastLog/#&/" /etc/ssh/sshd_config
+sudo sed -i -r "\$aPrintLastLog no" /etc/ssh/sshd_config
 
 # Restart ssh service for this change to take effect
-service ssh restart
+sudo service ssh restart
 
 # Remove motd.dynamic and stop it from generating
-mv /run/motd.dynamic /run/motd.dynamic.bak
-sed -i -r "s/.*pam_motd.so/#&/" /etc/pam.d/sshd
+sudo mv /run/motd.dynamic /run/motd.dynamic.bak
+sudo sed -i -r "s/.*pam_motd.so/#&/" /etc/pam.d/sshd
 
 # Download motd script
 curl -sSL "https://raw.github.com/nyitraig/rpi-motd/master/motd" -o "~/.motd"
-chmod +x ~/.motd
+sudo chmod +x ~/.motd
 
 # Make .bashrc call the script
 echo "
