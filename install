@@ -16,7 +16,7 @@ sudo mv /run/motd.dynamic /run/motd.dynamic.bak
 sudo sed -i -r "s/.*pam_motd.so/#&/" /etc/pam.d/sshd
 
 # Download motd script
-curl -sSL "https://raw.github.com/nyitraig/rpi-motd/master/motd" -o "~/.motd"
+curl -sSL https://raw.github.com/nyitraig/rpi-motd/master/motd -o ~/.motd
 sudo chmod +x ~/.motd
 
 # Make .bashrc call the script
