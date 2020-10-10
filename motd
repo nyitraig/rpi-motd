@@ -1,8 +1,9 @@
 #!/bin/bash
 
 function Progress {
-    _blocks=" ▏▎▍▌▋▊▉█"
     read _a _b _c
+    [[ -z "$_a" || -z "$_b" ]] && return
+    _blocks=" ▏▎▍▌▋▊▉█"
     let _length=${_c:-10}
     let _progress=100*$_a/$_b
     let _done=$_length*$_progress/100
